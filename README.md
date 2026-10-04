@@ -4,11 +4,14 @@ An interactive map showing new-build communities in Oakland County, Michigan, fr
 
 ## What's Included
 
-The map displays communities in three categories:
+The map displays communities from multiple builders including Pulte, Del Webb, Toll Brothers, D.R. Horton, M/I Homes, Lombardo, and Robertson Homes.
+
+Communities are organized in categories:
 
 - **Built, single-family** — Single-family homes
 - **Built, attached or condo** — Townhomes, villas, condos, and duplexes
 - **Still selling** — Active communities
+- Some communities have no category assigned
 
 ## Files
 
@@ -31,24 +34,11 @@ The `communities.csv` file includes these columns:
 **Optional columns:**
 - `builder` — Builder name (enables builder filter when populated)
 - `home_type` — Type: single-family, condo, townhome, etc.
-
-The map includes builder and city filters that can be used together; cities are extracted from the `display_name` field.
 - `year_built` — Year of construction
 - `value_estimate` — Typical home value estimate (numeric)
 - `value_source` — Source for value estimate (e.g., "Zestimate", "recent comps")
 
-Value estimates must include a labeled source in `value_source`. Missing fields are displayed as blank rather than estimated.
-
-## Known Limitations
-
-Some communities are not shown on the map because they did not produce an accepted geocode match:
-- Forest Edge
-- Meadows of Lyon
-- Aspen Ridge
-- The Townes at Main Street
-- The Villas at Waldon Village
-- Townes at Waldon Village
-- Cattails Preserve
+The map includes builder and city filters that can be used together; cities are extracted from the `display_name` field. Value estimates must include a labeled source in `value_source`. Missing fields are displayed as blank rather than estimated.
 
 ## Usage
 
