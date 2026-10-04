@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pulte communities in Oakland County, Michigan</title>
+<title>New-build communities in Oakland County, Michigan</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
@@ -28,22 +28,38 @@
   }
   ul.places button:hover { background: #f0f4f8; }
   .miss { font-size: 12px; color: #52606d; margin: 8px 0 4px; line-height: 1.35; }
+  .filter-section { margin: 10px 0 8px; }
+  .filter-section label { display: block; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: #52606d; font-weight: 700; margin-bottom: 4px; }
+  .filter-section select { width: 100%; padding: 6px 8px; font: inherit; font-size: 13px; border: 1px solid #cbd5e0; border-radius: 4px; background: #fff; }
   .leaflet-popup-content { margin: 10px 12px; font-size: 13px; line-height: 1.35; }
   .leaflet-popup-content strong { display: block; font-size: 14px; margin-bottom: 2px; }
+  .popup-detail { margin: 2px 0; }
   .osm { color: #52606d; font-size: 11px; margin-top: 6px; }
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div class="panel">
-  <h1>Pulte in Oakland County</h1>
+  <h1>New Builds in Oakland County</h1>
   <p class="sub">Pins are OpenStreetMap Nominatim matches only. Click a community to center it.</p>
+  <div class="filter-section">
+    <label for="builder-filter">Filter by builder</label>
+    <select id="builder-filter">
+      <option value="">All builders</option>
+    </select>
+  </div>
+  <div class="filter-section">
+    <label for="city-filter">Filter by city</label>
+    <select id="city-filter">
+      <option value="">All cities</option>
+    </select>
+  </div>
   <div id="legend"></div>
   <div id="lists"></div>
   <p class="miss">Not shown (no accepted geocode): Forest Edge, Meadows of Lyon, Aspen Ridge, The Townes at Main Street, The Villas at Waldon Village, Townes at Waldon Village, Cattails Preserve.</p>
 </div>
 <script>
-const COMMUNITIES = [{"name": "Pinehurst", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4652948, "lon": -83.6309561, "geocode_query": "Pinehurst Lyon Township Michigan", "display_name": "Pinehurst Acres, Lyon Charter Township, Oakland County, Michigan, United States"}, {"name": "Greystone Village", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4404187, "lon": -83.6282662, "geocode_query": "Greystone Village Lyon Township Michigan", "display_name": "Greystone Village, Lyon Charter Township, Oakland County, Michigan, United States"}, {"name": "Tanglewood Greenbrier", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4561822, "lon": -83.5841177, "geocode_query": "Tanglewood, Lyon Township, Oakland County, Michigan", "display_name": "Tanglewood, Lyon Charter Township, Oakland County, Michigan, United States"}, {"name": "Berkshire Pointe", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4920678, "lon": -83.5383055, "geocode_query": "Berkshire Pointe, Novi, Michigan", "display_name": "Berkshire Pointe, Novi, Oakland County, Michigan, United States"}, {"name": "Pine Vista", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.7452272, "lon": -83.3528604, "geocode_query": "Pine Vista, Independence Township, Michigan", "display_name": "Pine Vista, Independence Charter Township, Oakland County, Michigan, United States"}, {"name": "Emerson Park", "group": "BUILT, attached or condo", "product": "Townhomes", "lat": 42.4712935, "lon": -83.4776376, "geocode_query": "Emerson Park Novi Oakland County Michigan", "display_name": "Emerson Park, Novi, Oakland County, Michigan, United States"}, {"name": "West Trail Preserve", "group": "BUILT, attached or condo", "product": "Detached condos", "lat": 42.5640769, "lon": -83.4257589, "geocode_query": "West Trail Preserve West Bloomfield Oakland County Michigan", "display_name": "West Trail Preserve, West Bloomfield Township, Oakland County, Michigan, United States"}, {"name": "Villas at Stonebrook", "group": "BUILT, attached or condo", "product": "Ranch duplexes", "lat": 42.4860359, "lon": -83.5289285, "geocode_query": "Villas at Stonebrook Novi Oakland County Michigan", "display_name": "The Villas at Stonebrook, Novi, Oakland County, Michigan, United States"}, {"name": "Sumerlyn", "group": "BUILT, attached or condo", "product": "Ranch condos", "lat": 42.6887503, "lon": -83.2374461, "geocode_query": "Summerlyn, Auburn Hills, Michigan", "display_name": "Summerlyn, Auburn Hills, Oakland County, Michigan, United States"}, {"name": "Woodlands of Lyon", "group": "STILL SELLING", "product": "Homes", "lat": 42.4493168, "lon": -83.6215834, "geocode_query": "Woodlands of Lyon Michigan Oakland County", "display_name": "Woodlands of Lyon, Lyon Charter Township, Oakland County, Michigan, United States"}, {"name": "Townes at Lakeview", "group": "STILL SELLING", "product": "Townhomes", "lat": 42.5242811, "lon": -83.6211628, "geocode_query": "Townes at Lakeview Milford Oakland County Michigan", "display_name": "Townes at Lakeview, Milford Charter Township, Oakland County, Michigan, United States"}, {"name": "Lakeview Estates", "group": "STILL SELLING", "product": "Homes", "lat": 42.5242418, "lon": -83.617558, "geocode_query": "Lakeview Estates Milford Township Oakland County Michigan", "display_name": "Lakeview Estates, Milford Charter Township, Oakland County, Michigan, United States"}, {"name": "Kensington Ridge", "group": "STILL SELLING", "product": "Del Webb", "lat": 42.5292904, "lon": -83.62183, "geocode_query": "Kensington Ridge Milford Oakland County Michigan", "display_name": "Kensington Ridge, Milford Charter Township, Oakland County, Michigan, United States"}, {"name": "The Villas at Forest Glen", "group": "STILL SELLING", "product": "Villas", "lat": 42.7387655, "lon": -83.2504024, "geocode_query": "Forest Glen Orion Township Oakland County Michigan", "display_name": "The Villas at Forest Glen, Orion Charter Township, Oakland County, Michigan, United States"}, {"name": "Timberside Reserve", "group": "STILL SELLING", "product": "Homes", "lat": 42.5312033, "lon": -83.5274493, "geocode_query": "Timberside Reserve Wixom Oakland County Michigan", "display_name": "Timberside Reserve, Wixom, Oakland County, Michigan, United States"}, {"name": "Townes at Merrill Park", "group": "STILL SELLING", "product": "Townhomes", "lat": 42.5651615, "lon": -83.4466598, "geocode_query": "Merrill Park Commerce Township Oakland County Michigan", "display_name": "Merrill Park, Commerce Charter Township, Oakland County, Michigan, United States"}, {"name": "Ravines at Stonegate", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.709971224087, "lon": -83.218555587575, "geocode_query": "4975 Middlebury Drive, Lake Orion, MI 48359", "display_name": "4975 Middlebury Dr, Lake Orion, MI 48359"}, {"name": "Keatington Cedars", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.749853673561, "lon": -83.300909369245, "geocode_query": "2407 Canoe Circle Drive, Lake Orion, MI 48360", "display_name": "2407 Canoe Circle Dr, Lake Orion, MI 48360"}];
+const COMMUNITIES = [{"name": "Pinehurst", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4652948, "lon": -83.6309561, "geocode_query": "Pinehurst Lyon Township Michigan", "display_name": "Pinehurst Acres, Lyon Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Greystone Village", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4404187, "lon": -83.6282662, "geocode_query": "Greystone Village Lyon Township Michigan", "display_name": "Greystone Village, Lyon Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Tanglewood Greenbrier", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4561822, "lon": -83.5841177, "geocode_query": "Tanglewood, Lyon Township, Oakland County, Michigan", "display_name": "Tanglewood, Lyon Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Berkshire Pointe", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.4920678, "lon": -83.5383055, "geocode_query": "Berkshire Pointe, Novi, Michigan", "display_name": "Berkshire Pointe, Novi, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Pine Vista", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.7452272, "lon": -83.3528604, "geocode_query": "Pine Vista, Independence Township, Michigan", "display_name": "Pine Vista, Independence Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Emerson Park", "group": "BUILT, attached or condo", "product": "Townhomes", "lat": 42.4712935, "lon": -83.4776376, "geocode_query": "Emerson Park Novi Oakland County Michigan", "display_name": "Emerson Park, Novi, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "West Trail Preserve", "group": "BUILT, attached or condo", "product": "Detached condos", "lat": 42.5640769, "lon": -83.4257589, "geocode_query": "West Trail Preserve West Bloomfield Oakland County Michigan", "display_name": "West Trail Preserve, West Bloomfield Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Villas at Stonebrook", "group": "BUILT, attached or condo", "product": "Ranch duplexes", "lat": 42.4860359, "lon": -83.5289285, "geocode_query": "Villas at Stonebrook Novi Oakland County Michigan", "display_name": "The Villas at Stonebrook, Novi, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Sumerlyn", "group": "BUILT, attached or condo", "product": "Ranch condos", "lat": 42.6887503, "lon": -83.2374461, "geocode_query": "Summerlyn, Auburn Hills, Michigan", "display_name": "Summerlyn, Auburn Hills, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Woodlands of Lyon", "group": "STILL SELLING", "product": "Homes", "lat": 42.4493168, "lon": -83.6215834, "geocode_query": "Woodlands of Lyon Michigan Oakland County", "display_name": "Woodlands of Lyon, Lyon Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Townes at Lakeview", "group": "STILL SELLING", "product": "Townhomes", "lat": 42.5242811, "lon": -83.6211628, "geocode_query": "Townes at Lakeview Milford Oakland County Michigan", "display_name": "Townes at Lakeview, Milford Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Lakeview Estates", "group": "STILL SELLING", "product": "Homes", "lat": 42.5242418, "lon": -83.617558, "geocode_query": "Lakeview Estates Milford Township Oakland County Michigan", "display_name": "Lakeview Estates, Milford Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Kensington Ridge", "group": "STILL SELLING", "product": "Del Webb", "lat": 42.5292904, "lon": -83.62183, "geocode_query": "Kensington Ridge Milford Oakland County Michigan", "display_name": "Kensington Ridge, Milford Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "The Villas at Forest Glen", "group": "STILL SELLING", "product": "Villas", "lat": 42.7387655, "lon": -83.2504024, "geocode_query": "Forest Glen Orion Township Oakland County Michigan", "display_name": "The Villas at Forest Glen, Orion Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Timberside Reserve", "group": "STILL SELLING", "product": "Homes", "lat": 42.5312033, "lon": -83.5274493, "geocode_query": "Timberside Reserve Wixom Oakland County Michigan", "display_name": "Timberside Reserve, Wixom, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Townes at Merrill Park", "group": "STILL SELLING", "product": "Townhomes", "lat": 42.5651615, "lon": -83.4466598, "geocode_query": "Merrill Park Commerce Township Oakland County Michigan", "display_name": "Merrill Park, Commerce Charter Township, Oakland County, Michigan, United States", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Ravines at Stonegate", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.709971224087, "lon": -83.218555587575, "geocode_query": "4975 Middlebury Drive, Lake Orion, MI 48359", "display_name": "4975 Middlebury Dr, Lake Orion, MI 48359", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}, {"name": "Keatington Cedars", "group": "BUILT, single-family", "product": "Single-family", "lat": 42.749853673561, "lon": -83.300909369245, "geocode_query": "2407 Canoe Circle Drive, Lake Orion, MI 48360", "display_name": "2407 Canoe Circle Dr, Lake Orion, MI 48360", "builder": "", "home_type": "", "year_built": "", "value_estimate": "", "value_source": ""}];
 const COLORS = {"BUILT, single-family": "#1d4e89", "BUILT, attached or condo": "#0f766e", "STILL SELLING": "#c2410c", "COMING SOON": "#6d28d9"};
 const ORDER = ["BUILT, single-family", "BUILT, attached or condo", "STILL SELLING", "COMING SOON"];
 
@@ -60,56 +76,139 @@ function pinIcon(color) {
   return L.divIcon({ className: "", html: html, iconSize: [26, 36], iconAnchor: [13, 35], popupAnchor: [0, -30] });
 }
 
+function extractCity(displayName) {
+  if (!displayName) return "";
+  if (displayName.includes("(US Census geocoder)")) {
+    const parts = displayName.split(",");
+    if (parts.length >= 2) {
+      return parts[1].trim().replace(/ MI$/, "");
+    }
+  }
+  const parts = displayName.split(",");
+  if (parts.length >= 3) {
+    const city = parts[1].trim();
+    if (city && !city.includes("Oakland County")) return city;
+  }
+  return "";
+}
+
 const layers = [];
 const byGroup = {};
+const builders = new Set();
+const cities = new Set();
+
 COMMUNITIES.forEach((c, i) => {
+  if (c.builder) builders.add(c.builder);
+  c.city = extractCity(c.display_name);
+  if (c.city) cities.add(c.city);
+  
   const marker = L.marker([c.lat, c.lon], { icon: pinIcon(COLORS[c.group]), title: c.name });
-  marker.bindPopup(
-    "<strong>" + c.name + "</strong>"
-    + c.group + "<br>"
-    + c.product
-    + '<div class="osm">' + c.display_name + "</div>"
-  );
+  
+  let popup = "<strong>" + c.name + "</strong>";
+  if (c.builder) popup += '<div class="popup-detail">Builder: ' + c.builder + "</div>";
+  if (c.home_type) popup += '<div class="popup-detail">Type: ' + c.home_type + "</div>";
+  if (c.year_built) popup += '<div class="popup-detail">Year built: ' + c.year_built + "</div>";
+  if (c.value_estimate && c.value_source) {
+    popup += '<div class="popup-detail">Est. value: $' + c.value_estimate.toLocaleString() + " (" + c.value_source + ")</div>";
+  }
+  popup += '<div class="popup-detail">' + c.group + "</div>";
+  popup += '<div class="popup-detail">' + c.product + "</div>";
+  popup += '<div class="osm">' + c.display_name + "</div>";
+  
+  marker.bindPopup(popup);
   marker.addTo(map);
   c._marker = marker;
   layers.push(marker);
   (byGroup[c.group] = byGroup[c.group] || []).push(c);
 });
 
-const legend = document.getElementById("legend");
-ORDER.forEach(g => {
-  const n = (byGroup[g] || []).length;
-  const row = document.createElement("div");
-  row.className = "legend-row";
-  row.innerHTML = '<span class="swatch" style="background:' + COLORS[g] + '"></span><span>'
-    + g + (g === "COMING SOON" ? " (none plotted)" : " (" + n + ")") + "</span>";
-  legend.appendChild(row);
+const builderFilter = document.getElementById("builder-filter");
+Array.from(builders).sort().forEach(b => {
+  const opt = document.createElement("option");
+  opt.value = b;
+  opt.textContent = b;
+  builderFilter.appendChild(opt);
 });
 
-const lists = document.getElementById("lists");
-ORDER.forEach(g => {
-  const items = byGroup[g];
-  if (!items) return;
-  const h = document.createElement("div");
-  h.className = "group-label";
-  h.textContent = g;
-  lists.appendChild(h);
-  const ul = document.createElement("ul");
-  ul.className = "places";
-  items.forEach(c => {
-    const li = document.createElement("li");
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = c.name;
-    b.addEventListener("click", () => {
-      map.setView([c.lat, c.lon], 15);
-      c._marker.openPopup();
-    });
-    li.appendChild(b);
-    ul.appendChild(li);
-  });
-  lists.appendChild(ul);
+const cityFilter = document.getElementById("city-filter");
+Array.from(cities).sort().forEach(c => {
+  const opt = document.createElement("option");
+  opt.value = c;
+  opt.textContent = c;
+  cityFilter.appendChild(opt);
 });
+
+let activeBuilderFilter = "";
+let activeCityFilter = "";
+
+builderFilter.addEventListener("change", (e) => {
+  activeBuilderFilter = e.target.value;
+  renderUI();
+});
+
+cityFilter.addEventListener("change", (e) => {
+  activeCityFilter = e.target.value;
+  renderUI();
+});
+
+function renderUI() {
+  let filtered = COMMUNITIES;
+  
+  if (activeBuilderFilter) {
+    filtered = filtered.filter(c => c.builder === activeBuilderFilter);
+  }
+  
+  if (activeCityFilter) {
+    filtered = filtered.filter(c => c.city === activeCityFilter);
+  }
+  
+  COMMUNITIES.forEach(c => {
+    if (filtered.includes(c)) {
+      c._marker.addTo(map);
+    } else {
+      map.removeLayer(c._marker);
+    }
+  });
+  
+  const legend = document.getElementById("legend");
+  legend.innerHTML = "";
+  ORDER.forEach(g => {
+    const n = filtered.filter(c => c.group === g).length;
+    const row = document.createElement("div");
+    row.className = "legend-row";
+    row.innerHTML = '<span class="swatch" style="background:' + COLORS[g] + '"></span><span>'
+      + g + (g === "COMING SOON" ? " (none plotted)" : " (" + n + ")") + "</span>";
+    legend.appendChild(row);
+  });
+  
+  const lists = document.getElementById("lists");
+  lists.innerHTML = "";
+  ORDER.forEach(g => {
+    const items = filtered.filter(c => c.group === g);
+    if (!items.length) return;
+    const h = document.createElement("div");
+    h.className = "group-label";
+    h.textContent = g;
+    lists.appendChild(h);
+    const ul = document.createElement("ul");
+    ul.className = "places";
+    items.forEach(c => {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = c.name;
+      b.addEventListener("click", () => {
+        map.setView([c.lat, c.lon], 15);
+        c._marker.openPopup();
+      });
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+    lists.appendChild(ul);
+  });
+}
+
+renderUI();
 
 const bounds = L.latLngBounds(COMMUNITIES.map(c => [c.lat, c.lon]));
 map.fitBounds(bounds.pad(0.15));
