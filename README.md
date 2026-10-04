@@ -11,7 +11,6 @@ Communities are organized in categories:
 - **Built, single-family** — Single-family homes
 - **Built, attached or condo** — Townhomes, villas, condos, and duplexes
 - **Still selling** — Active communities
-- Some communities have no category assigned
 
 ## Files
 
