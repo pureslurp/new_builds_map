@@ -31,6 +31,8 @@ The `communities.csv` file includes these columns:
 **Optional columns:**
 - `builder` — Builder name (enables builder filter when populated)
 - `home_type` — Type: single-family, condo, townhome, etc.
+
+The map includes builder and city filters that can be used together; cities are extracted from the `display_name` field.
 - `year_built` — Year of construction
 - `value_estimate` — Typical home value estimate (numeric)
 - `value_source` — Source for value estimate (e.g., "Zestimate", "recent comps")

@@ -48,6 +48,12 @@
       <option value="">All builders</option>
     </select>
   </div>
+  <div class="filter-section">
+    <label for="city-filter">Filter by city</label>
+    <select id="city-filter">
+      <option value="">All cities</option>
+    </select>
+  </div>
   <div id="legend"></div>
   <div id="lists"></div>
   <p class="miss">Not shown (no accepted geocode): Forest Edge, Meadows of Lyon, Aspen Ridge, The Townes at Main Street, The Villas at Waldon Village, Townes at Waldon Village, Cattails Preserve.</p>
@@ -70,12 +76,31 @@ function pinIcon(color) {
   return L.divIcon({ className: "", html: html, iconSize: [26, 36], iconAnchor: [13, 35], popupAnchor: [0, -30] });
 }
 
+function extractCity(displayName) {
+  if (!displayName) return "";
+  if (displayName.includes("(US Census geocoder)")) {
+    const parts = displayName.split(",");
+    if (parts.length >= 2) {
+      return parts[1].trim().replace(/ MI$/, "");
+    }
+  }
+  const parts = displayName.split(",");
+  if (parts.length >= 3) {
+    const city = parts[1].trim();
+    if (city && !city.includes("Oakland County")) return city;
+  }
+  return "";
+}
+
 const layers = [];
 const byGroup = {};
 const builders = new Set();
+const cities = new Set();
 
 COMMUNITIES.forEach((c, i) => {
   if (c.builder) builders.add(c.builder);
+  c.city = extractCity(c.display_name);
+  if (c.city) cities.add(c.city);
   
   const marker = L.marker([c.lat, c.lon], { icon: pinIcon(COLORS[c.group]), title: c.name });
   
@@ -105,16 +130,37 @@ Array.from(builders).sort().forEach(b => {
   builderFilter.appendChild(opt);
 });
 
+const cityFilter = document.getElementById("city-filter");
+Array.from(cities).sort().forEach(c => {
+  const opt = document.createElement("option");
+  opt.value = c;
+  opt.textContent = c;
+  cityFilter.appendChild(opt);
+});
+
 let activeBuilderFilter = "";
+let activeCityFilter = "";
+
 builderFilter.addEventListener("change", (e) => {
   activeBuilderFilter = e.target.value;
   renderUI();
 });
 
+cityFilter.addEventListener("change", (e) => {
+  activeCityFilter = e.target.value;
+  renderUI();
+});
+
 function renderUI() {
-  const filtered = activeBuilderFilter
-    ? COMMUNITIES.filter(c => c.builder === activeBuilderFilter)
-    : COMMUNITIES;
+  let filtered = COMMUNITIES;
+  
+  if (activeBuilderFilter) {
+    filtered = filtered.filter(c => c.builder === activeBuilderFilter);
+  }
+  
+  if (activeCityFilter) {
+    filtered = filtered.filter(c => c.city === activeCityFilter);
+  }
   
   COMMUNITIES.forEach(c => {
     if (filtered.includes(c)) {
